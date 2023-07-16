@@ -1,0 +1,355 @@
+#+OPTIONS: ^:{}
+#+STARTUP: indent nolineimages overview num
+#+TITLE: Kent Beck's TDD example by Ruby
+#+AUTHOR: Shigeto R. Nishitani
+#+EMAIL:     (concat "shigeto_nishitani@mac.com")
+#+LANGUAGE:  jp
+# +OPTIONS:   H:4 toc:t num:2
+#+OPTIONS:   toc:nil
+#+TAG: Ruby, TDD
+#+TWITTER: off
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+
+* c9 :: Times We're Livin' in
+通貨の概念を，文字列で代用してみる
+- [ ] Currency?
+- [ ] Delete test Franc Multiplications?
+
+CHF stands for Confoederatio Helvetica franc, 
+where Confoederatio Helvetica is the Latin name for 
+the Swiss Confederation.
+
+Money classへの統合を試みるわけだが，
+class生成時のdefaultをうまく使わないと
+テストを大幅に書き換える必要が出てくる．
+
+すなわち
+#+begin_src ruby
+  class Money
+    protected attr_reader :amount
+    public attr_reader :currency
+    def initialize(amount, currency=nil)
+      @amount = amount
+      @currency = currency
+    end
+#+end_src
+としてcurrencyが定義されてなくてもMoneyは生成されて，
+さらに，Money.new(5).dollarとかで初めてちゃんと'USD'を
+定義したclassのインスタンスが生成されるようにする．
+いいのかな．．．Money.new(5, 'USD')がいいよね．
+全部そうした方が．．．
+
+* c8 :: Makin' Objects
+FrancとDollarを消そうというのだが，
+それは，times? で終わるんだろうか？
+まずFactory methodを使う．
+- [-] Dollar Franc Duplication
+  - [X] Common equals
+  - [ ] Common times
+
+#+begin_src ruby
+  test "dollar multiplication" do
+    five = Money.new(5).dollar
+
+    #    assert_equal(Dollar.new(10), product)
+    assert_true(Money.new(10).dollar.equals(five.times(2)))
+    assert_true(Money.new(15).dollar.equals(five.times(3)))
+  end
+
+  test "franc multiplication" do
+    five = Money.new(5).franc
+
+    #    assert_equal(Dollar.new(10), product)
+    assert_true(Money.new(10).franc.equals(five.times(2)))
+    assert_true(Money.new(15).franc.equals(five.times(3)))
+  end
+
+  test "equality" do
+    assert_true(Money.new(5).dollar.equals(Money.new(5).dollar))
+    assert_false(Money.new(5).dollar.equals(Money.new(6).dollar))
+    assert_true(Money.new(5).franc.equals(Money.new(5).franc))
+    assert_false(Money.new(5).franc.equals(Money.new(6).franc))
+    assert_false(Money.new(5).franc.equals(Money.new(5).dollar))
+  end
+#+end_src
+
+#+begin_src ruby
+    def dollar
+      return Dollar.new(@amount)
+    end
+    def franc
+      return Franc.new(@amount)
+    end
+#+end_src
+
+* c7 :: Apples and Oranges
+FrancとDollarを比べる．
+- [X] Compare Francs with Dollars
+- [ ] Currency?
+
+- [ ] 疑問
+  textに従うと，
+  : self.class == money.class
+  とするべきだが，明らかに失敗するので，
+  : self.class == object.class
+  としている．
+
+* c6 :: Equality for all, Redux
+前章でやったDollarをコピペしてFrancに変えちゃうのでは，
+重複が多すぎるので，共通の親クラスを作ってReduxする．
+- [ ] $5 + 10CHF = $10 (if rate is 2:1)
+- [X] $5 * 2 = $10
+- [X] Make "amount" private(protected)
+- [X] Dollar side-effects?
+- [ ] Money rounding?
+- [X] equals()
+- [ ] hashCode()
+- [ ] equal null
+- [ ] Equal object
+- [ ] 5 CHF *2 = 10 CHF
+- [-] Dollar Franc Duplication
+  - [X] Common equals
+  - [ ] Common times
+
+- [ ] 疑問
+  p. 75あたりのobjectのキャストがうまくいかない．
+  : money = Money.new(object)
+  ではダメで，
+  : money = Money.new(object.amount)
+  として対応．これが後で不幸を招くかも．
+  ついでにinitializeもMoneyで作っておく必要がある．
+
+#+begin_src ruby
+  test "equality" do
+    assert_true(Dollar.new(5).equals(Dollar.new(5)))
+    assert_false(Dollar.new(5).equals(Dollar.new(6)))
+    assert_true(Franc.new(5).equals(Franc.new(5)))
+    assert_false(Franc.new(5).equals(Franc.new(6)))
+  end
+#+end_src
+
+#+begin_src ruby
+  class Money
+    protected attr_reader :amount
+    def initialize(amount)
+      @amount = amount
+    end
+    def equals(object)
+      money = Money.new(object.amount)
+      return @amount == money.amount
+    end
+  end
+  class Dollar < Money
+    def times(multiplier)
+      return Dollar.new(@amount * multiplier)
+    end
+  end
+  class Franc < Money
+    def times(multiplier)
+      return Franc.new(@amount * multiplier)
+    end
+  end
+#+end_src
+
+* c5 :: Franc-ly Speaking
+- [ ] $5 + 10CHF = $10 (if rate is 2:1)
+- [X] $5 * 2 = $10
+- [X] Make "amount" private(protected)
+- [X] Dollar side-effects?
+- [ ] Money rounding?
+- [X] equals()
+- [ ] hashCode()
+- [ ] equal null
+- [ ] Equal object
+- [ ] 5 CHF *2 = 10 CHF
+
+#+begin_src ruby
+  test "franc multiplication" do
+    five = Franc.new(5)
+
+    #    assert_equal(Dollar.new(10), product)
+    assert_true(Franc.new(10).equals(five.times(2)))
+    assert_true(Franc.new(15).equals(five.times(3)))
+  end
+#+end_src
+
+#+begin_src ruby
+  class Franc
+    protected attr_reader :amount
+    def initialize(amount)
+      @amount = amount
+    end
+    def times(multiplier)
+      return Franc.new(@amount * multiplier)
+    end
+    def equals(object)
+      franc = object
+      return @amount == franc.amount
+    end
+  end
+#+end_src
+
+* c4 :: Privacy
+- [ ] $5 + 10CHF = $10 (if rate is 2:1)
+- [X] $5 * 2 = $10
+- [X] Make "amount" private(protected)
+- [X] Dollar side-effects?
+- [ ] Money rounding?
+- [X] equals()
+- [ ] hashCode()
+- [ ] equal null
+- [ ] Equal object
+
+- [ ] 疑問1
+  c4の最初のtest変更はobject同士の比較となる．
+  :  assert_equal(Dollar.new(10), product)
+  javaのassertEqualsのpropertyと思われるが，
+  assertEqualsが最初の引数のequals関数を呼び出しているものと
+  思われる．
+  Rubyでこれを実装するのは難しそう．なので，
+  : assert_true(Dollar.new(10).equals(product))
+  と書き換える．Dollarの実装はそのまま．
+
+- [ ] 疑問2
+  「@amountをprivateにする」という説明があるが，
+  これを失敗する．
+  equals method内でdollar.amountを使っているから．
+  この辺り，JavaのprivateとRubyのprivateの違いかも．
+  ここをRubyではprotectedにしている．
+  Rubyのprotected, private, public宣言は3.0からなので
+  注意が必要かも．
+
+#+begin_src ruby
+  class Dollar
+    protected attr_reader :amount
+#+end_src
+
+#+begin_src ruby
+  test "multiplication" do
+    five = Dollar.new(5)
+
+    #    assert_equal(Dollar.new(10), product)
+    assert_true(Dollar.new(10).equals(five.times(2)))
+    assert_true(Dollar.new(15).equals(five.times(3)))
+  end
+#+end_src
+* c3 :: Equality for All
+- [ ] $5 + 10CHF = $10 (if rate is 2:1)
+- [X] $5 * 2 = $10
+- [ ] Make "amount" private
+- [X] Dollar side-effects?
+- [ ] Money rounding?
+- [X] equals()
+- [ ] hashCode()
+
+#+begin_src ruby
+  test "equality" do
+    assert_true(Dollar.new(5).equals(Dollar.new(5)))
+    assert_false(Dollar.new(5).equals(Dollar.new(6)))
+  end
+#+end_src
+
+#+begin_src ruby
+    def equals(object)
+      dollar = object
+      return @amount == dollar.amount
+    end
+#+end_src
+
+* c2 :: Degenerate Objects
+- [ ] $5 + 10CHF = $10 (if rate is 2:1)
+- [X] $5 * 2 = $10
+- [ ] Make "amount" private
+- [ ] Dollar side-effects?
+- [ ] Money rounding?
+
+- [ ] 疑問
+  product = Dollar.new(five.times(2))となるはずだが，error
+  が出るんで，product = five.times(2)と修正．timesがDollarを
+  返してるんで．．．
+
+
+#+begin_src ruby
+# frozen_string_literal: true
+require "test_helper"
+class TddExample2Test < Test::Unit::TestCase
+  include TddExample2
+  test "multiplication" do
+    five = Dollar.new(5)
+    product = five.times(2)
+    assert_equal(10, product.amount)
+    product = five.times(3)
+    assert_equal(15, product.amount)
+  end
+end
+#+end_src
+
+#+begin_src ruby
+# frozen_string_literal: true
+
+require_relative "tdd_example2/version"
+
+module TddExample2
+  class Error < StandardError; end
+  # Your code goes here...
+  class Dollar
+    attr_reader :amount
+    def initialize(amount)
+      @amount = amount
+    end
+    def times(multiplier)
+      return Dollar.new(@amount * multiplier)
+    end
+  end
+end
+#+end_src
+
+
+* c1 :: Multi-Currency Money
+- [ ] $5 + 10CHF = $10 (if rate is 2:1)
+- [ ] $5 * 2 = $10
+  - [ ] Make "amount" private
+  - [ ] Dollar side-effects?
+  - [ ] Money rounding?
+#+begin_src ruby
+# frozen_string_literal: true
+
+require "test_helper"
+
+class TddExample2Test < Test::Unit::TestCase
+  include TddExample2
+  test "VERSION" do
+    assert do
+      ::TddExample2.const_defined?(:VERSION)
+    end
+  end
+
+  test "multiplication" do
+    five = Dollar.new(5)
+    five.times(2)
+    assert_equal(10, five.amount)
+  end
+end
+#+end_src
+
+#+begin_src ruby
+# frozen_string_literal: true
+
+require_relative "tdd_example2/version"
+
+module TddExample2
+  class Error < StandardError; end
+  # Your code goes here...
+  class Dollar
+    attr_reader :amount
+    def initialize(amount)
+      @amount = amount
+    end
+    def times(multiplier)
+      @amount *= multiplier
+    end
+  end
+end
+#+end_src
+
+
