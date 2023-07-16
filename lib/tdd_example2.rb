@@ -11,21 +11,21 @@ module TddExample2
       @augend = augend
       @addend = addend
     end
-    def reduced(to)
+    def reduce(to)
       amount = @augend.amount + @addend.amount
       return Money.new(amount,to)
     end
   end
   class Bank
-    def reduced(source, to)
+    def reduce(source, to)
 =begin      
       if source.class == Money
         return source.reduce(to)
       end
       sum = source
-      return sum.reduced(to)
+      return sum.reduce(to)
 =end
-      return source.reduced(to)
+      return source.reduce(to)
     end
   end
   class Money
@@ -54,7 +54,7 @@ module TddExample2
     def plus(addend)
       return Sum.new(self, addend)
     end
-    def reduced(to)
+    def reduce(to)
       return self
     end
   end

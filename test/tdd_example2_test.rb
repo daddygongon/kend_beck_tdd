@@ -32,8 +32,8 @@ class TddExample2Test < Test::Unit::TestCase
     five = Money.new(5).dollar
     sum = five.plus(five) # produce Sum
     bank = Bank.new
-    reduced = bank.reduced(sum, 'USD')
-    assert_true(Money.new(10).dollar.equals(reduced))
+    reduce= bank.reduce(sum, 'USD')
+    assert_true(Money.new(10).dollar.equals(reduce))
   end
   test "plus returns sum" do
     five = Money.new(5).dollar
@@ -43,7 +43,7 @@ class TddExample2Test < Test::Unit::TestCase
   end
   test "reduce money" do
     bank = Bank.new
-    result = bank.reduced(Money.new(1).dollar, 'USD')
+    result = bank.reduce(Money.new(1).dollar, 'USD')
     assert_true(Money.new(1).dollar.equals(result))
   end
 end
