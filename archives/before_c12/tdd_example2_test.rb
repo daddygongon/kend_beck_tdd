@@ -28,22 +28,9 @@ class TddExample2Test < Test::Unit::TestCase
     assert_equal("USD", Money.new(1).dollar.currency)
     assert_equal("CHF", Money.new(1).franc.currency)
   end
+
   test "simple addition" do
-    five = Money.new(5).dollar
-    sum = five.plus(five) # produce Sum
-    bank = Bank.new
-    reduced = bank.reduced(sum, 'USD')
-    assert_true(Money.new(10).dollar.equals(reduced))
-  end
-  test "plus returns sum" do
-    five = Money.new(5).dollar
-    sum = Sum.new(five, five)
-    assert_true(five.equals(sum.augend))
-    assert_true(five.equals(sum.addend))
-  end
-  test "reduce money" do
-    bank = Bank.new
-    result = bank.reduced(Money.new(1).dollar, 'USD')
-    assert_true(Money.new(1).dollar.equals(result))
+    sum = Money.new(5).dollar.plus(Money.new(5).dollar)
+    assert_true(Money.new(10).dollar.equals(sum))
   end
 end

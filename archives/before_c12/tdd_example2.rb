@@ -5,31 +5,8 @@ require_relative "tdd_example2/version"
 module TddExample2
   class Error < StandardError; end
   # Your code goes here...
-  class Sum
-    public attr_reader :augend, :addend
-    def initialize(augend, addend)
-      @augend = augend
-      @addend = addend
-    end
-    def reduced(to)
-      amount = @augend.amount + @addend.amount
-      return Money.new(amount,to)
-    end
-  end
-  class Bank
-    def reduced(source, to)
-=begin      
-      if source.class == Money
-        return source.reduce(to)
-      end
-      sum = source
-      return sum.reduced(to)
-=end
-      return source.reduced(to)
-    end
-  end
   class Money
-    public attr_reader :amount
+    protected attr_reader :amount
     public attr_reader :currency
     def initialize(amount, currency=nil)
       @amount = amount
@@ -52,10 +29,7 @@ module TddExample2
       return Money.new(@amount * multiplier, @currency)
     end
     def plus(addend)
-      return Sum.new(self, addend)
-    end
-    def reduced(to)
-      return self
+      return Money.new(@amount+addend.amount, @currency)
     end
   end
 end

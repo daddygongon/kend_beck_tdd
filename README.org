@@ -10,6 +10,51 @@
 #+TWITTER: off
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 
+* c13 :: Make It
+- [ ] $5 + 10CHF = $10 (if rate is 2:1)
+- [ ] $5 + $5 = $10
+- [ ] Return money from $5 + $5
+
+reducedをうまく，bank, sum, moneyに配置することで
+codeを綺麗にする．
+simple additionは一度動かなくなるが，comment outして
+新しいtestで駆動しながら，最後のあたりで復活させる．
+
+#+begin_src ruby
+  class Sum
+    public attr_reader :augend, :addend
+    def initialize(augend, addend)
+      @augend = augend
+      @addend = addend
+    end
+    def reduced(to)
+      amount = @augend.amount + @addend.amount
+      return Money.new(amount,to)
+    end
+  end
+  class Bank
+    def reduced(source, to)
+=begin      
+      if source.class == Money
+        return source.reduce(to)
+      end
+      sum = source
+      return sum.reduced(to)
+=end
+      return source.reduced(to)
+    end
+  end
+  class Money
+...
+    def plus(addend)
+      return Sum.new(self, addend)
+    end
+    def reduced(to)
+      return self
+    end
+  end
+#+end_src
+
 * c12 :: Addition, Finally
 - [ ] $5 + 10CHF = $10 (if rate is 2:1)
 さて，これ．
@@ -19,6 +64,31 @@
 さらにImposterパターンと呼ばれる手法でれに対処する．
 reduced とか expressionとかが入ってくるのですが，
 このあたりが難しそうなので，gitしましょう．
+
+#+begin_src ruby
+  test "simple addition" do
+    five = Money.new(5).dollar
+    sum = five.plus(five)
+    bank = Bank.new
+    reduced = bank.reduced(sum, 'USD')
+    assert_true(Money.new(10).dollar.equals(reduced))
+  end
+#+end_src
+
+#+begin_src ruby
+  class Bank
+    def reduced(object, currency)
+      amount = object.amount
+      return Money.new(amount, currency)
+    end
+  end
+  class Money
+    public attr_reader :amount
+...
+#+end_src
+Bank内にreducedだけを作ったが，
+ここで，object.amountにアクセスする必要が出てきて，
+protected -> publicに変更．
 * c11 :: The root of all evil
 subclassを本当に消すには．．．
 
