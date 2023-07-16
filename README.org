@@ -10,8 +10,97 @@
 #+TWITTER: off
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 
+* c12 :: Addition, Finally
+- [ ] $5 + 10CHF = $10 (if rate is 2:1)
+さて，これ．
+- [ ] $5 + $5 = $10
+をまずは実装．
+
+さらにImposterパターンと呼ばれる手法でれに対処する．
+reduced とか expressionとかが入ってくるのですが，
+このあたりが難しそうなので，gitしましょう．
+* c11 :: The root of all evil
+subclassを本当に消すには．．．
+
+- [X] Dollar Franc Duplication
+  - [X] Common equals
+  - [X] Common times
+#+begin_src ruby
+  test "dollar multiplication" do
+    five = Money.new(5).dollar
+
+    #    assert_equal(Dollar.new(10), product)
+    assert_true(Money.new(10).dollar.equals(five.times(2)))
+    assert_true(Money.new(15).dollar.equals(five.times(3)))
+  end
+
+  test "equality" do
+    assert_true(Money.new(5).dollar.equals(Money.new(5).dollar))
+    assert_false(Money.new(5).dollar.equals(Money.new(6).dollar))
+    assert_false(Money.new(5).franc.equals(Money.new(5).dollar))
+  end
+
+  test "currency" do
+    assert_equal("USD", Money.new(1).dollar.currency)
+    assert_equal("CHF", Money.new(1).franc.currency)
+  end
+#+end_src
+
+#+begin_src ruby
+  class Money
+    protected attr_reader :amount
+    public attr_reader :currency
+    def initialize(amount, currency=nil)
+      @amount = amount
+      @currency = currency
+    end
+    def equals(object)
+      money = Money.new(object.amount)
+#      p [object, money, self]
+      return @amount == money.amount &&
+        #        self.class == object.class
+        self.currency == object.currency
+    end
+    def dollar
+      return Money.new(@amount, 'USD')
+    end
+    def franc
+      return Money.new(@amount, 'CHF')
+    end
+    def times(multiplier)
+      return Money.new(@amount * multiplier, @currency)
+    end
+  end
+#+end_src
+* c10 :: Interesting times
+timesを統一して，subclassを消しちゃう．
+- [ ] Common times
+
+toStringは面倒なので，pメソッドで代用．
+equalsで出力．
+classが違うことを確認できる．
+
+#+begin_src ruby
+  test "different class equality" do
+    assert_true(Money.new(10, 'CHF').equals(Franc.new(10, 'CHF')))
+  end
+#+end_src
+
+#+begin_src ruby
+  class Money
+...
+    def times(multiplier)
+      return Money.new(@amount * multiplier, @currency)
+    end
+  end
+  class Dollar < Money
+  end
+  class Franc < Money
+  end
+#+end_src
+
 * c9 :: Times We're Livin' in
-通貨の概念を，文字列で代用してみる
+通貨の概念を，文字列で代用してみる．
 - [ ] Currency?
 - [ ] Delete test Franc Multiplications?
 
@@ -38,6 +127,54 @@ class生成時のdefaultをうまく使わないと
 定義したclassのインスタンスが生成されるようにする．
 いいのかな．．．Money.new(5, 'USD')がいいよね．
 全部そうした方が．．．
+
+#+begin_src ruby
+  test "currency" do
+    assert_equal("USD", Money.new(1).dollar.currency)
+    assert_equal("CHF", Money.new(1).franc.currency)
+  end
+#+end_src
+
+#+begin_src ruby
+  class Money
+    protected attr_reader :amount
+    public attr_reader :currency
+    def initialize(amount, currency=nil)
+      @amount = amount
+      @currency = currency
+    end
+    def equals(object)
+      money = Money.new(object.amount)
+      return @amount == money.amount &&
+        self.class == object.class
+    end
+    def dollar
+      return Dollar.new(@amount, 'USD')
+    end
+    def franc
+      return Franc.new(@amount, 'CHF')
+    end
+  end
+  class Dollar < Money
+    def initialize(amount, currency)
+      super(amount, currency)
+#      @currency = 'CHF'
+    end
+    def times(multiplier)
+      return Money.new(@amount * multiplier).dollar
+    end
+  end
+  class Franc < Money
+    def initialize(amount, currency)
+      super(amount, currency)
+#      @currency = 'CHF'
+    end
+    def times(multiplier)
+      return Money.new(@amount * multiplier).franc
+    end
+  end
+#+end_src
+subclass Dollar, Francのinitializeは消してもいいが今は，そのまま．
 
 * c8 :: Makin' Objects
 FrancとDollarを消そうというのだが，

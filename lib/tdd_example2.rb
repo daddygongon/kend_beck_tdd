@@ -14,32 +14,22 @@ module TddExample2
     end
     def equals(object)
       money = Money.new(object.amount)
+#      p [object, money, self]
       return @amount == money.amount &&
-        self.class == object.class
+        #        self.class == object.class
+        self.currency == object.currency
     end
     def dollar
-      return Dollar.new(@amount, 'USD')
+      return Money.new(@amount, 'USD')
     end
     def franc
-      return Franc.new(@amount, 'CHF')
-    end
-  end
-  class Dollar < Money
-    def initialize(amount, currency)
-      super(amount)
-      @currency = 'USD'
+      return Money.new(@amount, 'CHF')
     end
     def times(multiplier)
-      return Dollar.new(@amount * multiplier, nil)
+      return Money.new(@amount * multiplier, @currency)
     end
-  end
-  class Franc < Money
-    def initialize(amount, currency)
-      super(amount)
-      @currency = 'CHF'
-    end
-    def times(multiplier)
-      return Franc.new(@amount * multiplier, nil)
+    def plus(addend)
+      return Money.new(@amount+addend.amount, @currency)
     end
   end
 end
