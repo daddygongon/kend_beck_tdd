@@ -10,6 +10,9 @@
 #+TWITTER: off
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 
+* Introduction
+Ruby implementations for Kent Beck's 'Test Driven Development by Example'
+
 * c15 :: Mixed Currencies
 大体終わったけど，それほど綺麗ではないね．
 でも，だいぶ，JavaとRubyの差異がわかった．
