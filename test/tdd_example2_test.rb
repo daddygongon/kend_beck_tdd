@@ -46,4 +46,30 @@ class TddExample2Test < Test::Unit::TestCase
     result = bank.reduce(Money.new(1).dollar, 'USD')
     assert_true(Money.new(1).dollar.equals(result))
   end
+  test "reduce money different money" do
+    bank = Bank.new
+    bank.add_rate('CHF', 'USD', 2)
+    result = bank.reduce(Money.new(2).franc, 'USD')
+    assert_true(Money.new(1).dollar.equals(result))
+  end
+  test "identity rate" do
+    assert_equal(1.0, Bank.new.rate('USD', 'USD'))
+  end
+  test "mixed addition" do
+    five_bucks = Money.new(5).dollar
+    ten_francs = Money.new(10).franc
+    bank = Bank.new
+    bank.add_rate('CHF', 'USD', 2)
+
+    result = bank.reduce(five_bucks.plus(ten_francs), 'USD')
+    assert_true(Money.new(10).dollar.equals(result))
+  end
+ 
+  test "hash test" do
+    rate_table = {'USD'=>{'CHF'=>0.5, 'USD'=>1.0},
+                  'CHF'=>{'CHF'=>1.0, 'USD'=>2.0}}
+    from = 'CHF'
+    to = 'USD'
+    assert_equal(2.0, rate_table[from][to])
+  end
 end

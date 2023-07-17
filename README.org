@@ -10,6 +10,104 @@
 #+TWITTER: off
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 
+* c15 :: Mixed Currencies
+大体終わったけど，それほど綺麗ではないね．
+でも，だいぶ，JavaとRubyの差異がわかった．
+さて，テキストにできるかな？？
+
+- [ ] $5 + 10CHF = $10 (if rate is 2:1)
+- [ ] Return money from $5 + $5
+#+begin_src ruby
+  test "mixed addition" do
+    five_bucks = Money.new(5).dollar
+    ten_francs = Money.new(10).franc
+    bank = Bank.new
+    bank.add_rate('CHF', 'USD', 2)
+
+    result = bank.reduce(five_bucks.plus(ten_francs), 'USD')
+    assert_true(Money.new(10).dollar.equals(result))
+  end
+#+end_src
+
+#+begin_src ruby
+  class Sum
+    def reduce(bank, to)
+      amount = @augend.reduce(bank, to).amount +
+               @addend.reduce(bank, to).amount
+      return Money.new(amount,to)
+    end
+  end
+#+end_src
+
+* c14 :: Change
+- [ ] $5 + 10CHF = $10 (if rate is 2:1)
+- [ ] $5 + $5 = $10
+- [ ] Return money from $5 + $5
+- [ ] Bank.reduce(Money) 
+- [ ] Reduce Money with conversion 
+- [ ] Reduce(Bank, String)
+
+変換を実装するのですが，ややこしそうなので，ここで一旦中断．
+
+Hashを使ってrateを取り出すことをしている．
+Hash KeyをPairから作って，そのkeyから値を入れたり(puts),
+出したり(gets)する機能(Map, HashMap)を使っているみたい．
+
+実際にHash Key使っているのは， 
+Pair.new('CHF', 'USD')でそれ以外はrate=1.0を
+返せばいいので，そのままにしておく．
+hash_codeの実装を行えば，そこもうまくいくはず．
+
+#+begin_src ruby
+  test "identity rate" do
+    assert_equal(1.0, Bank.new.rate('USD', 'USD'))
+  end
+  test "hash test" do
+    rate_table = {'USD'=>{'CHF'=>0.5, 'USD'=>1.0},
+                  'CHF'=>{'CHF'=>1.0, 'USD'=>2.0}}
+    from = 'CHF'
+    to = 'USD'
+    assert_equal(2.0, rate_table[from][to])
+  end
+#+end_src
+
+#+begin_src ruby
+  class Pair
+    def initialize(from, to)
+      @from = from
+      @to = to
+    end
+    def equals(object)
+      pair = Pair.new(object)
+      return from.equals(pair.from) && to.equals(pair.to)
+    end
+    def hash_code()
+      return 0
+    end
+  end
+  class Bank
+    def initialize
+      @rates = {}
+    end
+    def add_rate(from, to, rate)
+      @rates.store(Pair.new(from,to).hash_code, rate)
+    end
+    def reduce(source, to)
+      return source.reduce(self, to)
+    end
+    def rate(from, to)
+      return 1.0 if from==to
+      return @rates[Pair.new(from,to).hash_code]
+    end
+  end
+  class Money
+    def reduce(bank, to)
+      rate = bank.rate(@currency, to)
+      return Money.new(@amount/rate, to)
+    end
+  end
+#+end_src
+
 * c13 :: Make It
 - [ ] $5 + 10CHF = $10 (if rate is 2:1)
 - [ ] $5 + $5 = $10
