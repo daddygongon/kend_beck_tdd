@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="jp" xml:lang="jp">
 <head>
-<!-- 2023-07-15 Sat 15:33 -->
+<!-- 2023-09-11 Mon 11:21 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Kent Beck's TDD example by Ruby</title>
@@ -19,10 +19,563 @@
 <body>
 <div id="content" class="content">
 <h1 class="title">Kent Beck's TDD example by Ruby</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgc05f023">1. Introduction</a></li>
+<li><a href="#orgfb7e8da">2. c15 :: Mixed Currencies</a></li>
+<li><a href="#orge1ee107">3. c14 :: Change</a></li>
+<li><a href="#org4e38972">4. c13 :: Make It</a></li>
+<li><a href="#org15a0897">5. c12 :: Addition, Finally</a></li>
+<li><a href="#org3cedbb8">6. c11 :: The root of all evil</a></li>
+<li><a href="#org8290793">7. c10 :: Interesting times</a></li>
+<li><a href="#org34d15cc">8. c9 :: Times We're Livin' in</a></li>
+<li><a href="#orgfeef986">9. c8 :: Makin' Objects</a></li>
+<li><a href="#org9ff3568">10. c7 :: Apples and Oranges</a></li>
+<li><a href="#org5831c79">11. c6 :: Equality for all, Redux</a></li>
+<li><a href="#org12fc1cf">12. c5 :: Franc-ly Speaking</a></li>
+<li><a href="#org0ee731b">13. c4 :: Privacy</a></li>
+<li><a href="#org09beb59">14. c3 :: Equality for All</a></li>
+<li><a href="#orgd3b152a">15. c2 :: Degenerate Objects</a></li>
+<li><a href="#org488a4d4">16. c1 :: Multi-Currency Money</a></li>
+</ul>
+</div>
+</div>
 
-<div id="outline-container-org80c31eb" class="outline-2">
-<h2 id="org80c31eb"><span class="section-number-2">1.</span> c4 :: Privacy</h2>
+<div id="outline-container-orgc05f023" class="outline-2">
+<h2 id="orgc05f023"><span class="section-number-2">1.</span> Introduction</h2>
 <div class="outline-text-2" id="text-1">
+<p>
+Ruby implementations for Kent Beck's 'Test Driven Development by Example'
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgfb7e8da" class="outline-2">
+<h2 id="orgfb7e8da"><span class="section-number-2">2.</span> c15 :: Mixed Currencies</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+大体終わったけど，それほど綺麗ではないね．
+でも，だいぶ，JavaとRubyの差異がわかった．
+さて，テキストにできるかな？？
+</p>
+
+<ul class="org-ul">
+<li class="off"><code>[&#xa0;]</code> $5 + 10CHF = $10 (if rate is 2:1)</li>
+<li class="off"><code>[&#xa0;]</code> Return money from $5 + $5</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-ruby">test <span style="color: #8b7355;">"mixed addition"</span> <span style="color: #1c86ee;">do</span>
+  five_bucks = <span style="color: #00688b;">Money</span>.new(5).dollar
+  ten_francs = <span style="color: #00688b;">Money</span>.new(10).franc
+  bank = <span style="color: #00688b;">Bank</span>.new
+  bank.add_rate(<span style="color: #8b7355;">'CHF'</span>, <span style="color: #8b7355;">'USD'</span>, 2)
+
+  result = bank.reduce(five_bucks.plus(ten_francs), <span style="color: #8b7355;">'USD'</span>)
+  assert_true(<span style="color: #00688b;">Money</span>.new(10).dollar.equals(result))
+<span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-ruby"><span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Sum</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">reduce</span>(bank, to)
+    amount = <span style="color: #2e8b57;">@augend</span>.reduce(bank, to).amount +
+             <span style="color: #2e8b57;">@addend</span>.reduce(bank, to).amount
+    <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Money</span>.new(amount,to)
+  <span style="color: #1c86ee;">end</span>
+<span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge1ee107" class="outline-2">
+<h2 id="orge1ee107"><span class="section-number-2">3.</span> c14 :: Change</h2>
+<div class="outline-text-2" id="text-3">
+<ul class="org-ul">
+<li class="off"><code>[&#xa0;]</code> $5 + 10CHF = $10 (if rate is 2:1)</li>
+<li class="off"><code>[&#xa0;]</code> $5 + $5 = $10</li>
+<li class="off"><code>[&#xa0;]</code> Return money from $5 + $5</li>
+<li class="off"><code>[&#xa0;]</code> Bank.reduce(Money)</li>
+<li class="off"><code>[&#xa0;]</code> Reduce Money with conversion</li>
+<li class="off"><code>[&#xa0;]</code> Reduce(Bank, String)</li>
+</ul>
+
+<p>
+変換を実装するのですが，ややこしそうなので，ここで一旦中断．
+</p>
+
+<p>
+Hashを使ってrateを取り出すことをしている．
+Hash KeyをPairから作って，そのkeyから値を入れたり(puts),
+出したり(gets)する機能(Map, HashMap)を使っているみたい．
+</p>
+
+<p>
+実際にHash Key使っているのは， 
+Pair.new('CHF', 'USD')でそれ以外はrate=1.0を
+返せばいいので，そのままにしておく．
+hash_codeの実装を行えば，そこもうまくいくはず．
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ruby">test <span style="color: #8b7355;">"identity rate"</span> <span style="color: #1c86ee;">do</span>
+  assert_equal(1.0, <span style="color: #00688b;">Bank</span>.new.rate(<span style="color: #8b7355;">'USD'</span>, <span style="color: #8b7355;">'USD'</span>))
+<span style="color: #1c86ee;">end</span>
+test <span style="color: #8b7355;">"hash test"</span> <span style="color: #1c86ee;">do</span>
+  rate_table = {<span style="color: #8b7355;">'USD'</span>=&gt;{<span style="color: #8b7355;">'CHF'</span>=&gt;0.5, <span style="color: #8b7355;">'USD'</span>=&gt;1.0},
+                <span style="color: #8b7355;">'CHF'</span>=&gt;{<span style="color: #8b7355;">'CHF'</span>=&gt;1.0, <span style="color: #8b7355;">'USD'</span>=&gt;2.0}}
+  from = <span style="color: #8b7355;">'CHF'</span>
+  to = <span style="color: #8b7355;">'USD'</span>
+  assert_equal(2.0, rate_table[from][to])
+<span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-ruby"><span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Pair</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">initialize</span>(from, to)
+    <span style="color: #2e8b57;">@from</span> = from
+    <span style="color: #2e8b57;">@to</span> = to
+  <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">equals</span>(object)
+    pair = <span style="color: #00688b;">Pair</span>.new(object)
+    <span style="color: #1c86ee;">return</span> from.equals(pair.from) &amp;&amp; to.equals(pair.to)
+  <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">hash_code</span>()
+    <span style="color: #1c86ee;">return</span> 0
+  <span style="color: #1c86ee;">end</span>
+<span style="color: #1c86ee;">end</span>
+<span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Bank</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">initialize</span>
+    <span style="color: #2e8b57;">@rates</span> = {}
+  <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">add_rate</span>(from, to, rate)
+    <span style="color: #2e8b57;">@rates</span>.store(<span style="color: #00688b;">Pair</span>.new(from,to).hash_code, rate)
+  <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">reduce</span>(source, to)
+    <span style="color: #1c86ee;">return</span> source.reduce(<span style="color: #1c86ee;">self</span>, to)
+  <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">rate</span>(from, to)
+    <span style="color: #1c86ee;">return</span> 1.0 <span style="color: #1c86ee;">if</span> from==to
+    <span style="color: #1c86ee;">return</span> <span style="color: #2e8b57;">@rates</span>[<span style="color: #00688b;">Pair</span>.new(from,to).hash_code]
+  <span style="color: #1c86ee;">end</span>
+<span style="color: #1c86ee;">end</span>
+<span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Money</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">reduce</span>(bank, to)
+    rate = bank.rate(<span style="color: #2e8b57;">@currency</span>, to)
+    <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Money</span>.new(<span style="color: #2e8b57;">@amount</span>/rate, to)
+  <span style="color: #1c86ee;">end</span>
+<span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4e38972" class="outline-2">
+<h2 id="org4e38972"><span class="section-number-2">4.</span> c13 :: Make It</h2>
+<div class="outline-text-2" id="text-4">
+<ul class="org-ul">
+<li class="off"><code>[&#xa0;]</code> $5 + 10CHF = $10 (if rate is 2:1)</li>
+<li class="off"><code>[&#xa0;]</code> $5 + $5 = $10</li>
+<li class="off"><code>[&#xa0;]</code> Return money from $5 + $5</li>
+</ul>
+
+<p>
+reduceをうまく，bank, sum, moneyに配置することで
+codeを綺麗にする．
+simple additionは一度動かなくなるが，comment outして
+新しいtestで駆動しながら，最後のあたりで復活させる．
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ruby">  <span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Sum</span>
+    <span style="color: #cd6600;">public</span> <span style="color: #cd6600;">attr_reader</span> <span style="color: #6e8b3d;">:augend</span>, <span style="color: #6e8b3d;">:addend</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">initialize</span>(augend, addend)
+      <span style="color: #2e8b57;">@augend</span> = augend
+      <span style="color: #2e8b57;">@addend</span> = addend
+    <span style="color: #1c86ee;">end</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">reduce</span>(to)
+      amount = <span style="color: #2e8b57;">@augend</span>.amount + <span style="color: #2e8b57;">@addend</span>.amount
+      <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Money</span>.new(amount,to)
+    <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Bank</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">reduce</span>(source, to)
+<span style="color: #7f7f7f;">=begin      </span>
+<span style="color: #7f7f7f;">      if source.class == Money</span>
+<span style="color: #7f7f7f;">        return source.reduce(to)</span>
+<span style="color: #7f7f7f;">      end</span>
+<span style="color: #7f7f7f;">      sum = source</span>
+<span style="color: #7f7f7f;">      return sum.reduce(to)</span>
+<span style="color: #7f7f7f;">=end</span>
+      <span style="color: #1c86ee;">return</span> source.reduce(to)
+    <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Money</span>
+...
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">plus</span>(addend)
+      <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Sum</span>.new(<span style="color: #1c86ee;">self</span>, addend)
+    <span style="color: #1c86ee;">end</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">reduce</span>(to)
+      <span style="color: #1c86ee;">return</span> <span style="color: #1c86ee;">self</span>
+    <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org15a0897" class="outline-2">
+<h2 id="org15a0897"><span class="section-number-2">5.</span> c12 :: Addition, Finally</h2>
+<div class="outline-text-2" id="text-5">
+<ul class="org-ul">
+<li class="off"><code>[&#xa0;]</code> $5 + 10CHF = $10 (if rate is 2:1)</li>
+</ul>
+<p>
+さて，これ．
+</p>
+<ul class="org-ul">
+<li class="off"><code>[&#xa0;]</code> $5 + $5 = $10</li>
+</ul>
+<p>
+をまずは実装．
+</p>
+
+<p>
+さらにImposterパターンと呼ばれる手法でれに対処する．
+reduce とか expressionとかが入ってくるのですが，
+このあたりが難しそうなので，gitしましょう．
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ruby">test <span style="color: #8b7355;">"simple addition"</span> <span style="color: #1c86ee;">do</span>
+  five = <span style="color: #00688b;">Money</span>.new(5).dollar
+  sum = five.plus(five)
+  bank = <span style="color: #00688b;">Bank</span>.new
+  reduce = bank.reduce(sum, <span style="color: #8b7355;">'USD'</span>)
+  assert_true(<span style="color: #00688b;">Money</span>.new(10).dollar.equals(reduce))
+<span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-ruby">  <span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Bank</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">reduce</span>(object, currency)
+      amount = object.amount
+      <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Money</span>.new(amount, currency)
+    <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Money</span>
+    <span style="color: #cd6600;">public</span> <span style="color: #cd6600;">attr_reader</span> <span style="color: #6e8b3d;">:amount</span>
+...
+</pre>
+</div>
+<p>
+Bank内にreduceだけを作ったが，
+ここで，object.amountにアクセスする必要が出てきて，
+protected -&gt; publicに変更．
+</p>
+</div>
+</div>
+<div id="outline-container-org3cedbb8" class="outline-2">
+<h2 id="org3cedbb8"><span class="section-number-2">6.</span> c11 :: The root of all evil</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+subclassを本当に消すには．．．
+</p>
+
+<ul class="org-ul">
+<li class="on"><code>[X]</code> Dollar Franc Duplication
+<ul class="org-ul">
+<li class="on"><code>[X]</code> Common equals</li>
+<li class="on"><code>[X]</code> Common times</li>
+</ul></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-ruby">test <span style="color: #8b7355;">"dollar multiplication"</span> <span style="color: #1c86ee;">do</span>
+  five = <span style="color: #00688b;">Money</span>.new(5).dollar
+
+  <span style="color: #7f7f7f;">#    </span><span style="color: #7f7f7f;">assert_equal(Dollar.new(10), product)</span>
+  assert_true(<span style="color: #00688b;">Money</span>.new(10).dollar.equals(five.times(2)))
+  assert_true(<span style="color: #00688b;">Money</span>.new(15).dollar.equals(five.times(3)))
+<span style="color: #1c86ee;">end</span>
+
+test <span style="color: #8b7355;">"equality"</span> <span style="color: #1c86ee;">do</span>
+  assert_true(<span style="color: #00688b;">Money</span>.new(5).dollar.equals(<span style="color: #00688b;">Money</span>.new(5).dollar))
+  assert_false(<span style="color: #00688b;">Money</span>.new(5).dollar.equals(<span style="color: #00688b;">Money</span>.new(6).dollar))
+  assert_false(<span style="color: #00688b;">Money</span>.new(5).franc.equals(<span style="color: #00688b;">Money</span>.new(5).dollar))
+<span style="color: #1c86ee;">end</span>
+
+test <span style="color: #8b7355;">"currency"</span> <span style="color: #1c86ee;">do</span>
+  assert_equal(<span style="color: #8b7355;">"USD"</span>, <span style="color: #00688b;">Money</span>.new(1).dollar.currency)
+  assert_equal(<span style="color: #8b7355;">"CHF"</span>, <span style="color: #00688b;">Money</span>.new(1).franc.currency)
+<span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-ruby">  <span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Money</span>
+    <span style="color: #cd6600;">protected</span> <span style="color: #cd6600;">attr_reader</span> <span style="color: #6e8b3d;">:amount</span>
+    <span style="color: #cd6600;">public</span> <span style="color: #cd6600;">attr_reader</span> <span style="color: #6e8b3d;">:currency</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">initialize</span>(amount, currency=<span style="color: #6e8b3d;">nil</span>)
+      <span style="color: #2e8b57;">@amount</span> = amount
+      <span style="color: #2e8b57;">@currency</span> = currency
+    <span style="color: #1c86ee;">end</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">equals</span>(object)
+      money = <span style="color: #00688b;">Money</span>.new(object.amount)
+<span style="color: #7f7f7f;">#      </span><span style="color: #7f7f7f;">p [object, money, self]</span>
+      <span style="color: #1c86ee;">return</span> <span style="color: #2e8b57;">@amount</span> == money.amount &amp;&amp;
+        <span style="color: #7f7f7f;">#        </span><span style="color: #7f7f7f;">self.class == object.class</span>
+        <span style="color: #1c86ee;">self</span>.currency == object.currency
+    <span style="color: #1c86ee;">end</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">dollar</span>
+      <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Money</span>.new(<span style="color: #2e8b57;">@amount</span>, <span style="color: #8b7355;">'USD'</span>)
+    <span style="color: #1c86ee;">end</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">franc</span>
+      <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Money</span>.new(<span style="color: #2e8b57;">@amount</span>, <span style="color: #8b7355;">'CHF'</span>)
+    <span style="color: #1c86ee;">end</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">times</span>(multiplier)
+      <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Money</span>.new(<span style="color: #2e8b57;">@amount</span> * multiplier, <span style="color: #2e8b57;">@currency</span>)
+    <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org8290793" class="outline-2">
+<h2 id="org8290793"><span class="section-number-2">7.</span> c10 :: Interesting times</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+timesを統一して，subclassを消しちゃう．
+</p>
+<ul class="org-ul">
+<li class="off"><code>[&#xa0;]</code> Common times</li>
+</ul>
+
+<p>
+toStringは面倒なので，pメソッドで代用．
+equalsで出力．
+classが違うことを確認できる．
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ruby">test <span style="color: #8b7355;">"different class equality"</span> <span style="color: #1c86ee;">do</span>
+  assert_true(<span style="color: #00688b;">Money</span>.new(10, <span style="color: #8b7355;">'CHF'</span>).equals(<span style="color: #00688b;">Franc</span>.new(10, <span style="color: #8b7355;">'CHF'</span>)))
+<span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-ruby">  <span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Money</span>
+...
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">times</span>(multiplier)
+      <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Money</span>.new(<span style="color: #2e8b57;">@amount</span> * multiplier, <span style="color: #2e8b57;">@currency</span>)
+    <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Dollar</span> &lt; <span style="color: #00688b;">Money</span>
+  <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Franc</span> &lt; <span style="color: #00688b;">Money</span>
+  <span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org34d15cc" class="outline-2">
+<h2 id="org34d15cc"><span class="section-number-2">8.</span> c9 :: Times We're Livin' in</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+通貨の概念を，文字列で代用してみる．
+</p>
+<ul class="org-ul">
+<li class="off"><code>[&#xa0;]</code> Currency?</li>
+<li class="off"><code>[&#xa0;]</code> Delete test Franc Multiplications?</li>
+</ul>
+
+<p>
+CHF stands for Confoederatio Helvetica franc, 
+where Confoederatio Helvetica is the Latin name for 
+the Swiss Confederation.
+</p>
+
+<p>
+Money classへの統合を試みるわけだが，
+class生成時のdefaultをうまく使わないと
+テストを大幅に書き換える必要が出てくる．
+</p>
+
+<p>
+すなわち
+</p>
+<div class="org-src-container">
+<pre class="src src-ruby"><span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Money</span>
+  <span style="color: #cd6600;">protected</span> <span style="color: #cd6600;">attr_reader</span> <span style="color: #6e8b3d;">:amount</span>
+  <span style="color: #cd6600;">public</span> <span style="color: #cd6600;">attr_reader</span> <span style="color: #6e8b3d;">:currency</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">initialize</span>(amount, currency=<span style="color: #6e8b3d;">nil</span>)
+    <span style="color: #2e8b57;">@amount</span> = amount
+    <span style="color: #2e8b57;">@currency</span> = currency
+  <span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+<p>
+としてcurrencyが定義されてなくてもMoneyは生成されて，
+さらに，Money.new(5).dollarとかで初めてちゃんと'USD'を
+定義したclassのインスタンスが生成されるようにする．
+いいのかな．．．Money.new(5, 'USD')がいいよね．
+全部そうした方が．．．
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ruby">test <span style="color: #8b7355;">"currency"</span> <span style="color: #1c86ee;">do</span>
+  assert_equal(<span style="color: #8b7355;">"USD"</span>, <span style="color: #00688b;">Money</span>.new(1).dollar.currency)
+  assert_equal(<span style="color: #8b7355;">"CHF"</span>, <span style="color: #00688b;">Money</span>.new(1).franc.currency)
+<span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-ruby">  <span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Money</span>
+    <span style="color: #cd6600;">protected</span> <span style="color: #cd6600;">attr_reader</span> <span style="color: #6e8b3d;">:amount</span>
+    <span style="color: #cd6600;">public</span> <span style="color: #cd6600;">attr_reader</span> <span style="color: #6e8b3d;">:currency</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">initialize</span>(amount, currency=<span style="color: #6e8b3d;">nil</span>)
+      <span style="color: #2e8b57;">@amount</span> = amount
+      <span style="color: #2e8b57;">@currency</span> = currency
+    <span style="color: #1c86ee;">end</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">equals</span>(object)
+      money = <span style="color: #00688b;">Money</span>.new(object.amount)
+      <span style="color: #1c86ee;">return</span> <span style="color: #2e8b57;">@amount</span> == money.amount &amp;&amp;
+        <span style="color: #1c86ee;">self</span>.class == object.class
+    <span style="color: #1c86ee;">end</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">dollar</span>
+      <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Dollar</span>.new(<span style="color: #2e8b57;">@amount</span>, <span style="color: #8b7355;">'USD'</span>)
+    <span style="color: #1c86ee;">end</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">franc</span>
+      <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Franc</span>.new(<span style="color: #2e8b57;">@amount</span>, <span style="color: #8b7355;">'CHF'</span>)
+    <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Dollar</span> &lt; <span style="color: #00688b;">Money</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">initialize</span>(amount, currency)
+      <span style="color: #1c86ee;">super</span>(amount, currency)
+<span style="color: #7f7f7f;">#      </span><span style="color: #7f7f7f;">@currency = 'CHF'</span>
+    <span style="color: #1c86ee;">end</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">times</span>(multiplier)
+      <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Money</span>.new(<span style="color: #2e8b57;">@amount</span> * multiplier).dollar
+    <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Franc</span> &lt; <span style="color: #00688b;">Money</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">initialize</span>(amount, currency)
+      <span style="color: #1c86ee;">super</span>(amount, currency)
+<span style="color: #7f7f7f;">#      </span><span style="color: #7f7f7f;">@currency = 'CHF'</span>
+    <span style="color: #1c86ee;">end</span>
+    <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">times</span>(multiplier)
+      <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Money</span>.new(<span style="color: #2e8b57;">@amount</span> * multiplier).franc
+    <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+<p>
+subclass Dollar, Francのinitializeは消してもいいが今は，そのまま．
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgfeef986" class="outline-2">
+<h2 id="orgfeef986"><span class="section-number-2">9.</span> c8 :: Makin' Objects</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+FrancとDollarを消そうというのだが，
+それは，times? で終わるんだろうか？
+まずFactory methodを使う．
+</p>
+<ul class="org-ul">
+<li class="trans"><code>[-]</code> Dollar Franc Duplication
+<ul class="org-ul">
+<li class="on"><code>[X]</code> Common equals</li>
+<li class="off"><code>[&#xa0;]</code> Common times</li>
+</ul></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-ruby">test <span style="color: #8b7355;">"dollar multiplication"</span> <span style="color: #1c86ee;">do</span>
+  five = <span style="color: #00688b;">Money</span>.new(5).dollar
+
+  <span style="color: #7f7f7f;">#    </span><span style="color: #7f7f7f;">assert_equal(Dollar.new(10), product)</span>
+  assert_true(<span style="color: #00688b;">Money</span>.new(10).dollar.equals(five.times(2)))
+  assert_true(<span style="color: #00688b;">Money</span>.new(15).dollar.equals(five.times(3)))
+<span style="color: #1c86ee;">end</span>
+
+test <span style="color: #8b7355;">"franc multiplication"</span> <span style="color: #1c86ee;">do</span>
+  five = <span style="color: #00688b;">Money</span>.new(5).franc
+
+  <span style="color: #7f7f7f;">#    </span><span style="color: #7f7f7f;">assert_equal(Dollar.new(10), product)</span>
+  assert_true(<span style="color: #00688b;">Money</span>.new(10).franc.equals(five.times(2)))
+  assert_true(<span style="color: #00688b;">Money</span>.new(15).franc.equals(five.times(3)))
+<span style="color: #1c86ee;">end</span>
+
+test <span style="color: #8b7355;">"equality"</span> <span style="color: #1c86ee;">do</span>
+  assert_true(<span style="color: #00688b;">Money</span>.new(5).dollar.equals(<span style="color: #00688b;">Money</span>.new(5).dollar))
+  assert_false(<span style="color: #00688b;">Money</span>.new(5).dollar.equals(<span style="color: #00688b;">Money</span>.new(6).dollar))
+  assert_true(<span style="color: #00688b;">Money</span>.new(5).franc.equals(<span style="color: #00688b;">Money</span>.new(5).franc))
+  assert_false(<span style="color: #00688b;">Money</span>.new(5).franc.equals(<span style="color: #00688b;">Money</span>.new(6).franc))
+  assert_false(<span style="color: #00688b;">Money</span>.new(5).franc.equals(<span style="color: #00688b;">Money</span>.new(5).dollar))
+<span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-ruby"><span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">dollar</span>
+  <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Dollar</span>.new(<span style="color: #2e8b57;">@amount</span>)
+<span style="color: #1c86ee;">end</span>
+<span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">franc</span>
+  <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Franc</span>.new(<span style="color: #2e8b57;">@amount</span>)
+<span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9ff3568" class="outline-2">
+<h2 id="org9ff3568"><span class="section-number-2">10.</span> c7 :: Apples and Oranges</h2>
+<div class="outline-text-2" id="text-10">
+<p>
+FrancとDollarを比べる．
+</p>
+<ul class="org-ul">
+<li class="on"><code>[X]</code> Compare Francs with Dollars</li>
+<li class="off"><code>[&#xa0;]</code> Currency?</li>
+
+<li class="off"><code>[&#xa0;]</code> <p>
+疑問
+textに従うと，
+</p>
+<pre class="example">
+self.class == money.class
+</pre>
+
+<p>
+とするべきだが，明らかに失敗するので，
+</p>
+<pre class="example">
+self.class == object.class
+</pre>
+
+<p>
+としている．
+</p></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org5831c79" class="outline-2">
+<h2 id="org5831c79"><span class="section-number-2">11.</span> c6 :: Equality for all, Redux</h2>
+<div class="outline-text-2" id="text-11">
+<p>
+前章でやったDollarをコピペしてFrancに変えちゃうのでは，
+重複が多すぎるので，共通の親クラスを作ってReduxする．
+</p>
 <ul class="org-ul">
 <li class="off"><code>[&#xa0;]</code> $5 + 10CHF = $10 (if rate is 2:1)</li>
 <li class="on"><code>[X]</code> $5 * 2 = $10</li>
@@ -30,9 +583,132 @@
 <li class="on"><code>[X]</code> Dollar side-effects?</li>
 <li class="off"><code>[&#xa0;]</code> Money rounding?</li>
 <li class="on"><code>[X]</code> equals()</li>
+<li class="off"><code>[&#xa0;]</code> hashCode()</li>
 <li class="off"><code>[&#xa0;]</code> equal null</li>
 <li class="off"><code>[&#xa0;]</code> Equal object</li>
+<li class="off"><code>[&#xa0;]</code> 5 CHF *2 = 10 CHF</li>
+<li class="trans"><code>[-]</code> Dollar Franc Duplication
+<ul class="org-ul">
+<li class="on"><code>[X]</code> Common equals</li>
+<li class="off"><code>[&#xa0;]</code> Common times</li>
+</ul></li>
+
+<li class="off"><code>[&#xa0;]</code> <p>
+疑問
+p. 75あたりのobjectのキャストがうまくいかない．
+</p>
+<pre class="example">
+money = Money.new(object)
+</pre>
+
+<p>
+ではダメで，
+</p>
+<pre class="example">
+money = Money.new(object.amount)
+</pre>
+
+<p>
+として対応．これが後で不幸を招くかも．
+ついでにinitializeもMoneyで作っておく必要がある．
+</p></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-ruby">test <span style="color: #8b7355;">"equality"</span> <span style="color: #1c86ee;">do</span>
+  assert_true(<span style="color: #00688b;">Dollar</span>.new(5).equals(<span style="color: #00688b;">Dollar</span>.new(5)))
+  assert_false(<span style="color: #00688b;">Dollar</span>.new(5).equals(<span style="color: #00688b;">Dollar</span>.new(6)))
+  assert_true(<span style="color: #00688b;">Franc</span>.new(5).equals(<span style="color: #00688b;">Franc</span>.new(5)))
+  assert_false(<span style="color: #00688b;">Franc</span>.new(5).equals(<span style="color: #00688b;">Franc</span>.new(6)))
+<span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-ruby"><span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Money</span>
+  <span style="color: #cd6600;">protected</span> <span style="color: #cd6600;">attr_reader</span> <span style="color: #6e8b3d;">:amount</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">initialize</span>(amount)
+    <span style="color: #2e8b57;">@amount</span> = amount
+  <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">equals</span>(object)
+    money = <span style="color: #00688b;">Money</span>.new(object.amount)
+    <span style="color: #1c86ee;">return</span> <span style="color: #2e8b57;">@amount</span> == money.amount
+  <span style="color: #1c86ee;">end</span>
+<span style="color: #1c86ee;">end</span>
+<span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Dollar</span> &lt; <span style="color: #00688b;">Money</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">times</span>(multiplier)
+    <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Dollar</span>.new(<span style="color: #2e8b57;">@amount</span> * multiplier)
+  <span style="color: #1c86ee;">end</span>
+<span style="color: #1c86ee;">end</span>
+<span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Franc</span> &lt; <span style="color: #00688b;">Money</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">times</span>(multiplier)
+    <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Franc</span>.new(<span style="color: #2e8b57;">@amount</span> * multiplier)
+  <span style="color: #1c86ee;">end</span>
+<span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org12fc1cf" class="outline-2">
+<h2 id="org12fc1cf"><span class="section-number-2">12.</span> c5 :: Franc-ly Speaking</h2>
+<div class="outline-text-2" id="text-12">
+<ul class="org-ul">
+<li class="off"><code>[&#xa0;]</code> $5 + 10CHF = $10 (if rate is 2:1)</li>
+<li class="on"><code>[X]</code> $5 * 2 = $10</li>
+<li class="on"><code>[X]</code> Make "amount" private(protected)</li>
+<li class="on"><code>[X]</code> Dollar side-effects?</li>
+<li class="off"><code>[&#xa0;]</code> Money rounding?</li>
+<li class="on"><code>[X]</code> equals()</li>
 <li class="off"><code>[&#xa0;]</code> hashCode()</li>
+<li class="off"><code>[&#xa0;]</code> equal null</li>
+<li class="off"><code>[&#xa0;]</code> Equal object</li>
+<li class="off"><code>[&#xa0;]</code> 5 CHF *2 = 10 CHF</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-ruby">test <span style="color: #8b7355;">"franc multiplication"</span> <span style="color: #1c86ee;">do</span>
+  five = <span style="color: #00688b;">Franc</span>.new(5)
+
+  <span style="color: #7f7f7f;">#    </span><span style="color: #7f7f7f;">assert_equal(Dollar.new(10), product)</span>
+  assert_true(<span style="color: #00688b;">Franc</span>.new(10).equals(five.times(2)))
+  assert_true(<span style="color: #00688b;">Franc</span>.new(15).equals(five.times(3)))
+<span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-ruby"><span style="color: #1c86ee;">class</span> <span style="color: #00688b;">Franc</span>
+  <span style="color: #cd6600;">protected</span> <span style="color: #cd6600;">attr_reader</span> <span style="color: #6e8b3d;">:amount</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">initialize</span>(amount)
+    <span style="color: #2e8b57;">@amount</span> = amount
+  <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">times</span>(multiplier)
+    <span style="color: #1c86ee;">return</span> <span style="color: #00688b;">Franc</span>.new(<span style="color: #2e8b57;">@amount</span> * multiplier)
+  <span style="color: #1c86ee;">end</span>
+  <span style="color: #1c86ee;">def</span> <span style="color: #cd9b1d;">equals</span>(object)
+    franc = object
+    <span style="color: #1c86ee;">return</span> <span style="color: #2e8b57;">@amount</span> == franc.amount
+  <span style="color: #1c86ee;">end</span>
+<span style="color: #1c86ee;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0ee731b" class="outline-2">
+<h2 id="org0ee731b"><span class="section-number-2">13.</span> c4 :: Privacy</h2>
+<div class="outline-text-2" id="text-13">
+<ul class="org-ul">
+<li class="off"><code>[&#xa0;]</code> $5 + 10CHF = $10 (if rate is 2:1)</li>
+<li class="on"><code>[X]</code> $5 * 2 = $10</li>
+<li class="on"><code>[X]</code> Make "amount" private(protected)</li>
+<li class="on"><code>[X]</code> Dollar side-effects?</li>
+<li class="off"><code>[&#xa0;]</code> Money rounding?</li>
+<li class="on"><code>[X]</code> equals()</li>
+<li class="off"><code>[&#xa0;]</code> hashCode()</li>
+<li class="off"><code>[&#xa0;]</code> equal null</li>
+<li class="off"><code>[&#xa0;]</code> Equal object</li>
 
 <li class="off"><code>[&#xa0;]</code> <p>
 疑問1
@@ -84,9 +760,9 @@ Rubyのprotected, private, public宣言は3.0からなので
 </div>
 </div>
 </div>
-<div id="outline-container-orgab7ff94" class="outline-2">
-<h2 id="orgab7ff94"><span class="section-number-2">2.</span> c3 :: Equality for All</h2>
-<div class="outline-text-2" id="text-2">
+<div id="outline-container-org09beb59" class="outline-2">
+<h2 id="org09beb59"><span class="section-number-2">14.</span> c3 :: Equality for All</h2>
+<div class="outline-text-2" id="text-14">
 <ul class="org-ul">
 <li class="off"><code>[&#xa0;]</code> $5 + 10CHF = $10 (if rate is 2:1)</li>
 <li class="on"><code>[X]</code> $5 * 2 = $10</li>
@@ -115,9 +791,9 @@ Rubyのprotected, private, public宣言は3.0からなので
 </div>
 </div>
 
-<div id="outline-container-orgb2d5de3" class="outline-2">
-<h2 id="orgb2d5de3"><span class="section-number-2">3.</span> c2 :: Degenerate Objects</h2>
-<div class="outline-text-2" id="text-3">
+<div id="outline-container-orgd3b152a" class="outline-2">
+<h2 id="orgd3b152a"><span class="section-number-2">15.</span> c2 :: Degenerate Objects</h2>
+<div class="outline-text-2" id="text-15">
 <ul class="org-ul">
 <li class="off"><code>[&#xa0;]</code> $5 + 10CHF = $10 (if rate is 2:1)</li>
 <li class="on"><code>[X]</code> $5 * 2 = $10</li>
@@ -172,9 +848,9 @@ product = Dollar.new(five.times(2))となるはずだが，error
 </div>
 
 
-<div id="outline-container-org3001f0e" class="outline-2">
-<h2 id="org3001f0e"><span class="section-number-2">4.</span> c1 :: Multi-Currency Money</h2>
-<div class="outline-text-2" id="text-4">
+<div id="outline-container-org488a4d4" class="outline-2">
+<h2 id="org488a4d4"><span class="section-number-2">16.</span> c1 :: Multi-Currency Money</h2>
+<div class="outline-text-2" id="text-16">
 <ul class="org-ul">
 <li class="off"><code>[&#xa0;]</code> $5 + 10CHF = $10 (if rate is 2:1)</li>
 <li class="off"><code>[&#xa0;]</code> $5 * 2 = $10
@@ -231,7 +907,7 @@ product = Dollar.new(five.times(2))となるはずだが，error
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Shigeto R. Nishitani</p>
-<p class="date">Created: 2023-07-15 Sat 15:33</p>
+<p class="date">Created: 2023-09-11 Mon 11:21</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

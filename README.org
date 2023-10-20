@@ -1,11 +1,12 @@
+#+qiita_private: 062e2df226b1b8c7ddac
 #+OPTIONS: ^:{}
 #+STARTUP: indent nolineimages overview num
 #+TITLE: Kent Beck's TDD example by Ruby
 #+AUTHOR: Shigeto R. Nishitani
 #+EMAIL:     (concat "shigeto_nishitani@mac.com")
 #+LANGUAGE:  jp
-# +OPTIONS:   H:4 toc:t num:2
-#+OPTIONS:   toc:nil
+#+OPTIONS:   H:4 toc:t num:2
+# +OPTIONS:   toc:nil
 #+TAG: Ruby, TDD
 #+TWITTER: off
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
