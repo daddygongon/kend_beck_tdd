@@ -18,15 +18,16 @@ class TddExample2Test < Test::Unit::TestCase
   test "mixed addition" do
     five_bucks = Money.new(5).dollar
     ten_franc = Money.new(10).franc
-#    sum = Sum.new(five_bucks, ten_franc) # expression
     bank = Bank.new()
     bank.add_rate('CHF', 'USD', 2)
     result = bank.reduce(five_bucks + ten_franc, 'USD')
     assert_equal(Money.new(10).dollar, result)
   end
+
   test "identity rate" do
     assert_equal(1, Bank.new.rate('USD', 'USD'))
   end
+
   test "plus returns sum" do
     five = Money.new(5).dollar
     sum = five + five # expression
@@ -42,9 +43,9 @@ class TddExample2Test < Test::Unit::TestCase
   end
 
   test "bank returns reduce sum" do
-    three_usd = Money.new(3).dollar
-    four_usd = Money.new(4).dollar
-    sum = Sum.new(three_usd, four_usd) # expression
+    three_bucks = Money.new(3).dollar
+    four_bucks = Money.new(4).dollar
+    sum = Sum.new(three_bucks, four_bucks) # expression
     bank = Bank.new()
     result = bank.reduce(sum, 'USD')
     assert_equal(Money.new(7).dollar, result)
@@ -62,7 +63,6 @@ class TddExample2Test < Test::Unit::TestCase
     bank = Bank.new
     reduced = bank.reduce(sum, 'USD')
     assert_equal(Money.new(10).dollar, reduced)
-#    assert_equal(Money.new(10).dollar, sum)
   end
 
   test "currency" do
@@ -77,7 +77,6 @@ class TddExample2Test < Test::Unit::TestCase
     assert_false Money.new(5).franc == Money.new(6).franc
     assert_false Money.new(5).franc == Money.new(5).dollar
   end
-
 
   test "multiplication" do
     five = Money.new(5).dollar

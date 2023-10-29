@@ -147,7 +147,7 @@ simple additionは一度動かなくなるが，comment outして
   end
   class Money
 ...
-    def plus(addend)
+    def +(addend) #plus
       return Sum.new(self, addend)
     end
     def reduce(to)
@@ -200,8 +200,9 @@ reduce とか Expressionとかが入ってくるのですが．．．
 ExpressionはJavaでは型宣言があるのであると便利ですが，
 Rubyでは不要なようです．
 
-このあたりよく読むと相当複雑な動きをうまく，
-コントロールしています．Imposterってのはそういうのかな？
+このあたりよく読むと相当複雑な動きをうまくコントロールしています．
+Imposterってのはそういうのかな？
+調べたところでは，Test doubleのようなんですが．．．
 #+begin_src ruby
   test "simple addition" do
     five = Money.new(5).dollar

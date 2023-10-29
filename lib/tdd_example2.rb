@@ -4,22 +4,17 @@ require_relative "tdd_example2/version"
 
 module TddExample2
   class Error < StandardError; end
-  # Your code goes here...
+
   class Pair
     def initialize(from, to)
       @from = from
       @to = to
     end
-=begin
-    def equals(object)
-      pair = Pair.new(object)
-      return from.equals(pair.from) && to.equals(pair.to)
-    end
-=end
-    def hashcode()
-      return 0
-    end
+    
+    def hashcode() = 0
+      
   end
+    
   class Sum
     attr_reader :augend, :addend
     def initialize(augend, addend)
@@ -32,36 +27,26 @@ module TddExample2
       return Money.new(amount, to)
     end
   end
-  module Expression
-    # Ruby implementation of Java's interface, but ...
-  end
+
   class Bank
     def initialize
       @rates = {}
     end
 
-    # include Expression
     def add_rate(from, to, rate)
       @rates[Pair.new(from, to).hashcode] = rate
     end
-    def reduce(source, to)
-=begin
-      if source.class == Money
-        return source.reduce(to)
-      end
-      sum = source # not new
-=end
-      return source.reduce(self, to) #Money.new(10).dollar
-    end
+
+    def reduce(source, to) = source.reduce(self, to)
+
     def rate(from, to)
       return 1 if from == to
       return @rates[Pair.new(from, to).hashcode]
-#      return (from=='CHF' && to=='USD') ? 2 : 1
     end
   end
+
   class Money
-    public attr_reader :amount
-    public attr_reader :currency
+    public attr_reader :amount, :currency
     
     def initialize(amount, currency=nil)
       @amount = amount
@@ -71,15 +56,12 @@ module TddExample2
       rate = bank.rate(@currency, to)
       return Money.new(@amount/rate, to) #self
     end
-    def +(addend)
-      return Sum.new(self, addend)
-#      return Money.new(@amount + addend.amount, currency)
-    end
+
+    def +(addend) = Sum.new(self, addend)
     
     def ==(object)
-      money = object
-      return @amount == money.amount &&
-        self.currency == money.currency
+      return @amount == object.amount &&
+        self.currency == object.currency
     end
 
     def dollar = Money.new(@amount, 'USD')
