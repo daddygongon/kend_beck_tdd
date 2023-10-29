@@ -45,9 +45,6 @@ Ruby implementations of Kent Beck's 'Test Driven Development by Example'
 
 * c14 :: Change
 - [ ] $5 + 10CHF = $10 (if rate is 2:1)
-- [ ] $5 + $5 = $10
-- [ ] Return money from $5 + $5
-- [ ] Bank.reduce(Money) 
 - [ ] Reduce Money with conversion 
 - [ ] Reduce(Bank, String)
 
@@ -114,9 +111,9 @@ hash_codeの実装を行えば，そこもうまくいくはず．
 
 * c13 :: Make It
 - [ ] $5 + 10CHF = $10 (if rate is 2:1)
-- [ ] $5 + $5 = $10
-- [ ] Return money from $5 + $5
-
+- [X] $5 + $5 = $10
+- [X] Return money from $5 + $5
+- [X] Bank.reduce(Money)
 reduceをうまく，bank, sum, moneyに配置することで
 codeを綺麗にする．
 simple additionは一度動かなくなるが，comment outして
@@ -136,7 +133,8 @@ simple additionは一度動かなくなるが，comment outして
   end
   class Bank
     def reduce(source, to)
-=begin      
+=begin
+# ここは，Moneyにreduceを作ってifブロックが消せる
       if source.class == Money
         return source.reduce(to)
       end
@@ -152,25 +150,61 @@ simple additionは一度動かなくなるが，comment outして
       return Sum.new(self, addend)
     end
     def reduce(to)
+# これ以降ではここが舞台になる
       return self
     end
   end
 #+end_src
 
+#+begin_src ruby
+  test "plus returns sum" do
+    five = Money.new(5).dollar
+    sum = five + five # expression
+    assert_equal(five, sum.augend)
+    assert_equal(five, sum.addend)
+  end
+
+  test "bank returns reduce sum" do
+    three_usd = Money.new(3).dollar
+    four_usd = Money.new(4).dollar
+    sum = Sum.new(three_usd, four_usd) # expression
+    bank = Bank.new()
+    result = bank.reduce(sum, 'USD')
+    assert_equal(Money.new(7).dollar, result)
+  end
+
+  test "reduce money" do
+    bank = Bank.new()
+    result = bank.reduce(Money.new(1).dollar, 'USD')
+    assert_equal(Money.new(1).dollar, result)
+  end
+
+  test "simple addition" do
+    five = Money.new(5).dollar
+    sum = five + five # expression
+    bank = Bank.new
+    reduced = bank.reduce(sum, 'USD')
+    assert_equal(Money.new(10).dollar, reduced)
+#    assert_equal(Money.new(10).dollar, sum)
+  end
+#+end_src
 * c12 :: Addition, Finally
 - [ ] $5 + 10CHF = $10 (if rate is 2:1)
 さて，これ．
 - [ ] $5 + $5 = $10
 をまずは実装．
 
-さらにImposterパターンと呼ばれる手法でれに対処する．
-reduce とか expressionとかが入ってくるのですが，
-このあたりが難しそうなので，gitしましょう．
+さらにImposterパターンと呼ばれる手法でこれに対処する．
+reduce とか Expressionとかが入ってくるのですが．．．
+ExpressionはJavaでは型宣言があるのであると便利ですが，
+Rubyでは不要なようです．
 
+このあたりよく読むと相当複雑な動きをうまく，
+コントロールしています．Imposterってのはそういうのかな？
 #+begin_src ruby
   test "simple addition" do
     five = Money.new(5).dollar
-    sum = five.plus(five)
+    sum = five + five
     bank = Bank.new
     reduce = bank.reduce(sum, 'USD')
     assert_true(Money.new(10).dollar.equals(reduce))
@@ -192,6 +226,89 @@ Bank内にreduceだけを作ったが，
 ここで，object.amountにアクセスする必要が出てきて，
 protected -> publicに変更．
 * ruby_extra :: equals -> ==
+RubyのOne line defや==を使うとより読みやすく
+code, testを記述できます．
+#+begin_src ruby
+# frozen_string_literal: true
+
+require_relative "tdd_example4/version"
+
+module TddExample4
+  class Money
+    protected attr_reader :amount
+    attr_reader :currency
+    def initialize(amount, currency=nil)
+      @amount = amount
+      @currency = currency
+    end
+
+    def ==(object)
+      return @amount == object.amount &&
+        self.currency == object.currency
+    end
+
+    def dollar = Money.new(@amount, 'USD')
+
+    def franc = Money.new(@amount, 'CHF')
+
+    def times multiplier
+      return Money.new(@amount * multiplier, @currency)
+    end
+  end
+end
+#+end_src
+
+#+begin_src ruby
+# frozen_string_literal: true
+
+require "test_helper"
+
+class TddExample4Test < Test::Unit::TestCase
+  include TddExample4
+  test "VERSION" do
+    assert do
+      ::TddExample4.const_defined?(:VERSION)
+    end
+  end
+
+  test "something useful" do
+    #    assert_equal("expected", "actual")
+    assert_equal("expected", "expected")
+  end
+
+  
+  test "currency" do
+    assert_equal 'USD',  Money.new(1).dollar.currency
+    assert_equal 'CHF',  Money.new(1).franc.currency
+  end
+
+  test "equality" do
+    assert_true  Money.new(5).dollar == Money.new(5).dollar
+    assert_false Money.new(5).dollar == Money.new(6).dollar
+    assert_true  Money.new(5).franc == Money.new(5).franc
+    assert_false Money.new(5).franc == Money.new(6).franc
+    assert_false Money.new(5).franc == Money.new(5).dollar
+  end
+
+  test "==" do
+    assert_true  Money.new(5).dollar == Money.new(5).dollar
+  end
+
+
+  test "multiplication" do
+    five = Money.new(5).dollar
+    assert_true Money.new(10).dollar == five.times(2)
+    assert_true Money.new(15).dollar == five.times(3)
+  end
+
+  test "Franc multiplication" do
+    five = Money.new(5).franc
+    assert_true Money.new(10).franc == five.times(2)
+    assert_true Money.new(15).franc == five.times(3)
+  end
+end
+#+end_src
+
 * c11 :: The root of all evil
 subclassを本当に消すには．．．
 
