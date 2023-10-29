@@ -15,12 +15,13 @@
 Ruby implementations of Kent Beck's 'Test Driven Development by Example'
 
 * c15 :: Mixed Currencies
-大体終わったけど，それほど綺麗ではないね．
-でも，だいぶ，JavaとRubyの差異がわかった．
-さて，テキストにできるかな？？
+大体終わったけど，codeはそれほど綺麗ではないね．
+でも，testは見やすい．
+白鳥のモデルみたい．水上は優雅だけど，水中はジタバタ．
+さて，途中の試行錯誤がTDDのキモなんですが，
+どこまで記述できるかな．
 
 - [X] $5 + 10CHF = $10 (if rate is 2:1)
-- [X] Return money from $5 + $5
 #+begin_src ruby
   test "mixed addition" do
     five_bucks = Money.new(5).dollar
@@ -28,8 +29,8 @@ Ruby implementations of Kent Beck's 'Test Driven Development by Example'
     bank = Bank.new
     bank.add_rate('CHF', 'USD', 2)
 
-    result = bank.reduce(five_bucks.plus(ten_francs), 'USD')
-    assert_true(Money.new(10).dollar.equals(result))
+    result = bank.reduce(five_bucks + ten_francs, 'USD')
+    assert_true Money.new(10).dollar == result
   end
 #+end_src
 
@@ -45,10 +46,8 @@ Ruby implementations of Kent Beck's 'Test Driven Development by Example'
 
 * c14 :: Change
 - [ ] $5 + 10CHF = $10 (if rate is 2:1)
-- [ ] Reduce Money with conversion 
-- [ ] Reduce(Bank, String)
-
-変換を実装するのですが，ややこしそうなので，ここで一旦中断．
+- [X] Reduce Money with conversion 
+- [X] Reduce(Bank, String)
 
 Hashを使ってrateを取り出すことをしている．
 Hash KeyをPairから作って，そのkeyから値を入れたり(puts),
@@ -64,6 +63,7 @@ hash_codeの実装を行えば，そこもうまくいくはず．
     assert_equal(1.0, Bank.new.rate('USD', 'USD'))
   end
   test "hash test" do
+    # こんな実装もありかと思うんですが，hash keyで
     rate_table = {'USD'=>{'CHF'=>0.5, 'USD'=>1.0},
                   'CHF'=>{'CHF'=>1.0, 'USD'=>2.0}}
     from = 'CHF'
@@ -79,6 +79,7 @@ hash_codeの実装を行えば，そこもうまくいくはず．
       @to = to
     end
     def equals(object)
+      # これは使ってないかも
       pair = Pair.new(object)
       return from.equals(pair.from) && to.equals(pair.to)
     end

@@ -10,66 +10,84 @@ class TddExample2Test < Test::Unit::TestCase
     end
   end
 
-  test "dollar multiplication" do
-    five = Money.new(5).dollar
-
-    #    assert_equal(Dollar.new(10), product)
-    assert_true(Money.new(10).dollar.equals(five.times(2)))
-    assert_true(Money.new(15).dollar.equals(five.times(3)))
+  test "something useful" do
+    #    assert_equal("expected", "actual")
+    assert_equal("expected", "expected")
   end
 
-  test "equality" do
-    assert_true(Money.new(5).dollar.equals(Money.new(5).dollar))
-    assert_false(Money.new(5).dollar.equals(Money.new(6).dollar))
-    assert_false(Money.new(5).franc.equals(Money.new(5).dollar))
+  test "mixed addition" do
+    five_bucks = Money.new(5).dollar
+    ten_franc = Money.new(10).franc
+#    sum = Sum.new(five_bucks, ten_franc) # expression
+    bank = Bank.new()
+    bank.add_rate('CHF', 'USD', 2)
+    result = bank.reduce(five_bucks + ten_franc, 'USD')
+    assert_equal(Money.new(10).dollar, result)
   end
-
-  test "currency" do
-    assert_equal("USD", Money.new(1).dollar.currency)
-    assert_equal("CHF", Money.new(1).franc.currency)
-  end
-  test "simple addition" do
-    five = Money.new(5).dollar
-    sum = five.plus(five) # produce Sum
-    bank = Bank.new
-    reduce= bank.reduce(sum, 'USD')
-    assert_true(Money.new(10).dollar.equals(reduce))
+  test "identity rate" do
+    assert_equal(1, Bank.new.rate('USD', 'USD'))
   end
   test "plus returns sum" do
     five = Money.new(5).dollar
-    sum = Sum.new(five, five)
-    assert_true(five.equals(sum.augend))
-    assert_true(five.equals(sum.addend))
+    sum = five + five # expression
+    assert_equal(five, sum.augend)
+    assert_equal(five, sum.addend)
   end
-  test "reduce money" do
-    bank = Bank.new
-    result = bank.reduce(Money.new(1).dollar, 'USD')
-    assert_true(Money.new(1).dollar.equals(result))
-  end
-  test "reduce money different money" do
-    bank = Bank.new
+
+  test "reduce money different currency" do
+    bank = Bank.new()
     bank.add_rate('CHF', 'USD', 2)
     result = bank.reduce(Money.new(2).franc, 'USD')
-    assert_true(Money.new(1).dollar.equals(result))
+    assert_equal(Money.new(1).dollar, result)
   end
-  test "identity rate" do
-    assert_equal(1.0, Bank.new.rate('USD', 'USD'))
-  end
-  test "mixed addition" do
-    five_bucks = Money.new(5).dollar
-    ten_francs = Money.new(10).franc
-    bank = Bank.new
-    bank.add_rate('CHF', 'USD', 2)
 
-    result = bank.reduce(five_bucks.plus(ten_francs), 'USD')
-    assert_true(Money.new(10).dollar.equals(result))
+  test "bank returns reduce sum" do
+    three_usd = Money.new(3).dollar
+    four_usd = Money.new(4).dollar
+    sum = Sum.new(three_usd, four_usd) # expression
+    bank = Bank.new()
+    result = bank.reduce(sum, 'USD')
+    assert_equal(Money.new(7).dollar, result)
   end
- 
-  test "hash test" do
-    rate_table = {'USD'=>{'CHF'=>0.5, 'USD'=>1.0},
-                  'CHF'=>{'CHF'=>1.0, 'USD'=>2.0}}
-    from = 'CHF'
-    to = 'USD'
-    assert_equal(2.0, rate_table[from][to])
+
+  test "reduce money" do
+    bank = Bank.new()
+    result = bank.reduce(Money.new(1).dollar, 'USD')
+    assert_equal(Money.new(1).dollar, result)
+  end
+
+  test "simple addition" do
+    five = Money.new(5).dollar
+    sum = five + five # expression
+    bank = Bank.new
+    reduced = bank.reduce(sum, 'USD')
+    assert_equal(Money.new(10).dollar, reduced)
+#    assert_equal(Money.new(10).dollar, sum)
+  end
+
+  test "currency" do
+    assert_equal 'USD',  Money.new(1).dollar.currency
+    assert_equal 'CHF',  Money.new(1).franc.currency
+  end
+
+  test "equality" do
+    assert_true  Money.new(5).dollar == Money.new(5).dollar
+    assert_false Money.new(5).dollar == Money.new(6).dollar
+    assert_true  Money.new(5).franc == Money.new(5).franc
+    assert_false Money.new(5).franc == Money.new(6).franc
+    assert_false Money.new(5).franc == Money.new(5).dollar
+  end
+
+
+  test "multiplication" do
+    five = Money.new(5).dollar
+    assert_true Money.new(10).dollar == five.times(2)
+    assert_true Money.new(15).dollar == five.times(3)
+  end
+
+  test "Franc multiplication" do
+    five = Money.new(5).franc
+    assert_true Money.new(10).franc == five.times(2)
+    assert_true Money.new(15).franc == five.times(3)
   end
 end
