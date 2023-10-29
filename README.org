@@ -12,15 +12,15 @@
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 
 * Introduction
-Ruby implementations for Kent Beck's 'Test Driven Development by Example'
+Ruby implementations of Kent Beck's 'Test Driven Development by Example'
 
 * c15 :: Mixed Currencies
 大体終わったけど，それほど綺麗ではないね．
 でも，だいぶ，JavaとRubyの差異がわかった．
 さて，テキストにできるかな？？
 
-- [ ] $5 + 10CHF = $10 (if rate is 2:1)
-- [ ] Return money from $5 + $5
+- [X] $5 + 10CHF = $10 (if rate is 2:1)
+- [X] Return money from $5 + $5
 #+begin_src ruby
   test "mixed addition" do
     five_bucks = Money.new(5).dollar
@@ -191,6 +191,7 @@ reduce とか expressionとかが入ってくるのですが，
 Bank内にreduceだけを作ったが，
 ここで，object.amountにアクセスする必要が出てきて，
 protected -> publicに変更．
+* ruby_extra :: equals -> ==
 * c11 :: The root of all evil
 subclassを本当に消すには．．．
 
